@@ -20,56 +20,75 @@
 
 //     Ok(())
 
-use std::collections::btree_map::Values;
-use std::{io, path};
+
+
+use std::{fs, io};
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::{Display, Path};
+use std::path::Path;
+
+//METHDO TO CHECK TYPE OF VAR IN RUST.
+// use std::any::type_name;
+
+// fn type_of<T>(_: T) -> &'static str {
+//     type_name::<T>()
+// }
 
 
-fn file(value:String) -> File{
-    let path = Path::new(&value);
+fn file(value:&String) -> File{
+    let path = Path::new(value.trim());
     let display = path.display();
+    println!("file saving to {}", display);
+            let file = match File::create(&path) {
+                Err(why) => panic!("Cant create file due to {}",why),
+                Ok(file) => file,
+                };
+            return file;
+        
+        
+}
 
-    let mut file = match File::create(&path) {
+    
+
+
+fn read(value:&String)-> String {
+    let mut content = String::new();
+    let path = Path::new(value.trim());
+
+    let mut file = match File::open(&path) {
         Err(why) => panic!("Cant create file due to {}",why),
         Ok(file) => file,
         
     };
-    return file;
+    
+    match file.read_to_string(&mut content){
+        Err(why) => panic!("couldn't read: {}", why),
+        Ok(_) => return  content,
 
+    };
+
+    
+    
 }
 
 
-fn read(value:String)-> String {
-    let mut content = String::new();
-    
-    return match file(value).read_to_string(&mut content)  {
-        Err(why) => panic!("not able to read file {}",why),
-        Ok(_) => content,
-    } 
-    }
 
-
-
-fn Update(value:String){
+fn update(value:&String){
     let mut content:String = read(value);
 
     let mut input_text = String::new();
     println!("Enter some input: ");
     io::stdin().read_line(&mut input_text).expect("Failed to read!");
     content = content + &input_text;
-    
-    match file(value).write_all(input_text.as_bytes()) {
+    match file(value).write_all(content.as_bytes()) {
         Err(why) => panic!("Can't create file due to {}",why),
-        Ok(_) => println!("your file created"),
+        Ok(_) => println!("your file updated"),
     }
-    
-    
+         
     
 }
 
-fn Create(&value:str){
+fn create(value:&String){
     let mut input_text = String::new();
     println!("Enter some input: ");
     io::stdin().read_line(&mut input_text).expect("Failed to read!");
@@ -80,39 +99,73 @@ fn Create(&value:str){
     }
 }
 
+fn delete(value:&String){
+    let trimmed_value = value.trim();
+    fs::remove_file(trimmed_value).expect("file not found");
+    println!("\n {} file deleted", trimmed_value);
 
+}
 
-fn  parsing_in(input:String)-> i32{
+fn  parsing_in(input:&String)-> i32{
     let parsed_input:i32 = input.trim().parse().expect("not able to parse");
     return parsed_input;
 }
 
+
 fn main() {
     let mut input = String::new();
-    let mut parse_in:i32 = 5 ;
+    let mut parse_int:i32 = 5 ;
     let mut value= String::new();
-
-    while parse_in>0{
-        println!("Option for Calculations:\n 1: Create \n 2: Read \n 3:Update \n 4:Delete  \n 0: Exit");
+    
+    while parse_int>0{
+        println!("CRUD operations:\n 1: Create \n 2: Read \n 3:Update \n 4:Delete  \n 0: Exit");
         io::stdin().read_line(&mut input).expect("Failed to read!");
+        // println!("{}",type_of(&input));
         
-        println!("Enter file path");
-        io::stdin().read_line(&mut value).expect("Failed to read!");
-        
-        parse_in = parsing_in( input.clone());
-
-        match parse_in {
+        parse_int = parsing_in( &input);
+        match parse_int {
             1 => {
-                Create(value);
+                println!("Enter file path");
+                io::stdin().read_line(&mut value).expect("Failed to read!");
+                create(&value);
+                input = String::new();
+                value = String::new();
+                
             },
-            2 => {},
-            3 => {},
-            4 => {},
-            0 => {},
-            _ => {}
+            2 => {
+                println!("Enter file path");
+                io::stdin().read_line(&mut value).expect("Failed to read!");
+                println!("{}",read(&value)) ;
+                input = String::new();
+                value = String::new();
+                
+            },
+            3 => {
+                println!("Enter file path");
+                io::stdin().read_line(&mut value).expect("Failed to read!");
+                update(&value);
+                input = String::new();
+                value = String::new();
+            },
+            4 => {
+                println!("Enter file path");
+                io::stdin().read_line(&mut value).expect("Failed to read!");
+           
+                delete(&value);
+                input = String::new();
+                value = String::new();
+            },
+            0 => {
+                parse_int = 0;
+            },
+
+            _ => {
+                println!("Entered wrong choice!")
+            }
             
         }
     }
+    println!("Have a good time>")
 }
 
 
