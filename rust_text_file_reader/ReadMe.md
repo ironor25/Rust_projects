@@ -1,6 +1,6 @@
 # Rust Text File Reader
 
-This project is a simple Rust application designed to read and process text files. It demonstrates basic file handling and string manipulation in Rust.
+This project is a simple Rust cli application designed to read and process text files. It demonstrates basic file handling and string manipulation in Rust.
 
 ## Features
 
